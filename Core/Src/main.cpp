@@ -11,6 +11,26 @@ int main(void)
 	OBCCU::inscribe();
 	OBCCU::start();
 
+	HeapOrder start_charging_order = {
+		900,
+		&OBCCU::Orders::start_charging
+	};
+
+	HeapOrder stop_charging_order = {
+		901,
+		&OBCCU::Orders::stop_charging
+	};
+
+	HeapOrder open_contactors_order = {
+		902,
+		&OBCCU::Orders::open_contactors
+	};
+
+	HeapOrder close_contactors_order = {
+		903,
+		&OBCCU::Orders::close_contactors
+	};
+
 	HeapPacket battery1_packet = {
 		910,
 		&OBCCU::Packets::batteries_data[0].data
@@ -76,7 +96,7 @@ int main(void)
 
 	while(1) {
 		for (HeapPacket* packet : battery_packets) {
-			OBCCU::udp_socket.send(*packet);
+			OBCCU::Communications::udp_socket.send(*packet);
 		}
 
 		OBCCU::update();
