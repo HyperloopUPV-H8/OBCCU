@@ -183,7 +183,7 @@ DualPWMmap TimerPeripheral::available_dual_pwms = {
 	{{PE11,PE10}, {timer1, {TIM_CHANNEL_2, PWM_PHASED}}},
 	{{PE13,PE12}, {timer1, {TIM_CHANNEL_3, PWM_PHASED}}},
 	{{PE5,PE4}, {timer15, {TIM_CHANNEL_1, PWM_NORMAL}}},
-	{{PE9,PE8}, {timer1, {TIM_CHANNEL_1, PWM_NORMAL}}},
+	{{PE9,PE8}, {timer1, {TIM_CHANNEL_1, PWM_PHASED}}},
 };
 
 #endif

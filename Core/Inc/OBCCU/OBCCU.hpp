@@ -96,6 +96,7 @@ namespace OBCCU {
     namespace Measurements {
         double charging_current;
     }
+
     DigitalOutput IMD_Power;
 
 
@@ -107,13 +108,13 @@ namespace OBCCU {
         bms = BMSH(SPI::spi3);
         high_voltage_charger = HalfBridge(PE9, PE8, PE13, PE12, PD4);
 
-        IMD_Power = DigitalOutput(PD2);
+        IMD_Power = DigitalOutput(PE2);
 
         StateMachines::general = StateMachine(States::General::CONNECTING);
         StateMachines::operational = StateMachine(States::Operational::IDLE);
         StateMachines::charging = StateMachine(States::Charging::PRECHARGE);
 
-        Sensors::charging_current = LinearSensor(PA2, 1, 1, Measurements::charging_current);
+        Sensors::charging_current = LinearSensor(PA0, 1, 1, Measurements::charging_current);
         Sensors::inverter_temperature = ADC::inscribe(PA3);
         Sensors::capacitor_temperature = ADC::inscribe(PA4);
         Sensors::transformer_temperature = ADC::inscribe(PA5);
@@ -130,7 +131,7 @@ namespace OBCCU {
 
     void start() {
         STLIB::start();
-        Communications::udp_socket = DatagramSocket( IPV4("192.168.1.8"), 50400, IPV4("192.168.0.9"), 50400);
+        Communications::udp_socket = DatagramSocket( IPV4("192.168.1.9"), 50400, IPV4("192.168.0.9"), 50400);
 
         int i = 0;
         for (LTC6811& adc: bms.external_adcs) {
@@ -184,13 +185,14 @@ namespace OBCCU {
         }, Gen::FAULT);
 
         sm.add_low_precision_cyclic_action([&]() {
-            bms.update_temperatures();
+            bms.start_adc_conversion_temperatures();
         }, ms(100), Gen::OPERATIONAL);
         
         sm.add_mid_precision_cyclic_action([&]() {
-            bms.update_cell_voltages();
+            bms.start_adc_conversion_all_cells();
         }, us(5000), Gen::OPERATIONAL);
 
+        sm.add_state_machine(op_sm, Gen::OPERATIONAL);
 
         op_sm.add_state(Op::CHARGING);
         op_sm.add_state(Op::BALANCING);
@@ -231,7 +233,8 @@ namespace OBCCU {
             return not Conditions::want_to_charge;
         });
 
-        sm.add_state_machine(op_sm, Gen::OPERATIONAL);
+      
+        op_sm.add_state_machine(ch_sm, Op::CHARGING);
 
         ch_sm.add_state(Ch::CONSTANT_CURRENT);
         ch_sm.add_state(Ch::CONSTANT_VOLTAGE);
@@ -248,7 +251,7 @@ namespace OBCCU {
 
         ch_sm.add_mid_precision_cyclic_action([&]() {
             high_voltage_charger.set_phase(high_voltage_charger.get_phase() - 1);
-        }, us(10), Ch::PRECHARGE);
+        }, us(50), Ch::PRECHARGE);
 
         ch_sm.add_exit_action( [&]() {
             high_voltage_charger.set_phase(0);
@@ -282,7 +285,6 @@ namespace OBCCU {
             return false;
         });
 
-        op_sm.add_state_machine(ch_sm, Op::CHARGING);
         Conditions::ready = true;
         sm.check_transitions();
 	}

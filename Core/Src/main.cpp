@@ -94,10 +94,13 @@ int main(void)
 		&battery10_packet
 	};
 
+	DatagramSocket test_socket(IPV4("192.168.1.9"), 50400, IPV4("192.168.0.9"), 50400);
 	while(1) {
-		for (HeapPacket* packet : battery_packets) {
-			OBCCU::Communications::udp_socket.send(*packet);
-		}
+		// for (HeapPacket* packet : battery_packets) {
+		// 	test_socket.send(*packet);
+		// }
+
+		test_socket.send(battery1_packet);
 
 		OBCCU::update();
 	}

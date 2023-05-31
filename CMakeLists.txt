@@ -8,14 +8,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(BMS-LIB_DIR /opt/BMS-LIB/BMS-LIB)
 set(EXECUTABLE ${PROJECT_NAME}.elf)
 
+file(GLOB_RECURSE SOURCE_C ${CMAKE_SOURCE_DIR}/Core/*.c ${CMAKE_SOURCE_DIR}/Drivers/*.c ${CMAKE_SOURCE_DIR}/Middlewares/*.c ${CMAKE_SOURCE_DIR}/LWIP/*.c) 
+file(GLOB_RECURSE SOURCE_CPP ${CMAKE_SOURCE_DIR}/Core/*.cpp ${CMAKE_SOURCE_DIR}/Drivers/*.cpp ${CMAKE_SOURCE_DIR}/Middlewares/*.cpp ${CMAKE_SOURCE_DIR}/LWIP/*.cpp) 
+file(GLOB_RECURSE SOURCE_H ${CMAKE_SOURCE_DIR}/Core/*.h ${CMAKE_SOURCE_DIR}/Drivers/*.h ${CMAKE_SOURCE_DIR}/Middlewares/*.h ${CMAKE_SOURCE_DIR}/LWIP/*.h) 
+file(GLOB_RECURSE SOURCE_HPP ${CMAKE_SOURCE_DIR}/Core/*.hpp ${CMAKE_SOURCE_DIR}/Drivers/*.hpp ${CMAKE_SOURCE_DIR}/Middlewares/*.hpp ${CMAKE_SOURCE_DIR}/LWIP/*.hpp) 
+
 add_subdirectory(${BMS-LIB_DIR} ${BMS-LIB_DIR}/build)
 add_executable(${EXECUTABLE} 
-  Core/Src/main.cpp 
-  Core/Src/syscalls.c 
-  Core/Src/stm32h7xx_hal_msp.c
-  Core/Src/stm32h7xx_it.c
-  Core/Src/sysmem.c
-  Core/Src/system_stm32h7xx.c
+  ${SOURCE_C}
+  ${SOURCE_CPP}
+  ${SOURCE_H}
+  ${SOURCE_HPP}
   Core/Startup/startup_stm32h723zgtx.s
   )
 
@@ -27,7 +30,42 @@ target_compile_definitions(${EXECUTABLE} PUBLIC
   -DDATA_IN_D2_SRAM
 )
 
+option(BOARD "Board clock config" OFF)
+option(NUCLEO "Nucleo clock config" OFF)
+
+if(BOARD)
+  add_definitions(-DBOARD)
+  add_definitions(-DHSE_VALUE=25000000)
+endif()
+
+if(NUCLEO)
+  add_definitions(-DNUCLEO)
+  add_definitions(-DHSE_VALUE=8000000)
+endif()
+
 target_include_directories(${EXECUTABLE} PUBLIC
+  Drivers/CMSIS/Device/ST/STM32H7xx/Include
+  Drivers/CMSIS/Include
+  Drivers/STM32H7xx_HAL_Driver/Inc
+  Drivers/STM32H7xx_HAL_Driver/Inc/Legacy
+  Middlewares/Third_Party/LwIP/src/include
+  Middlewares/Third_Party/LwIP/system
+  Middlewares/Third_Party/LwIP/src/netif/ppp
+  Middlewares/Third_Party/LwIP/src/include/lwip
+  Middlewares/Third_Party/LwIP/src/include/lwip/apps
+  Middlewares/Third_Party/LwIP/src/include/lwip/priv
+  Middlewares/Third_Party/LwIP/src/include/lwip/prot
+  Middlewares/Third_Party/LwIP/src/include/netif
+  Middlewares/Third_Party/LwIP/src/include/compat
+  Middlewares/Third_Party/LwIP/src/include/compat/posix
+  Middlewares/Third_Party/LwIP/src/include/compat/posix/arpa
+  Middlewares/Third_Party/LwIP/src/include/compat/posix/net
+  Middlewares/Third_Party/LwIP/src/include/compat/posix/sys
+  Middlewares/Third_Party/LwIP/src/include/compat/stdc
+  Middlewares/Third_Party/LwIP/system/arch
+  Drivers/BSP/Components
+  Drivers/BSP/Components/lan8742
+
   Core/Inc
 )
 
@@ -38,8 +76,8 @@ target_compile_options(${EXECUTABLE} PUBLIC
   -mfloat-abi=hard
   -mthumb
   
-  # -O3
-  -g3
+  ${PROFILE}
+  ${OPTIMIZATION}
   -ffunction-sections
   -fdata-sections
   -fno-exceptions
