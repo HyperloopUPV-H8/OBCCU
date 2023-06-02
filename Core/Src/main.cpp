@@ -11,6 +11,8 @@ int main(void)
 	OBCCU::inscribe();
 	OBCCU::start();
 
+	ServerSocket tcp_socket(IPV4("192.168.1.9"), 50500);
+
 	HeapOrder start_charging_order = {
 		900,
 		&OBCCU::Orders::start_charging
@@ -101,6 +103,7 @@ int main(void)
 		// }
 
 		test_socket.send(battery1_packet);
+		test_socket.send(battery2_packet);
 
 		OBCCU::update();
 	}
