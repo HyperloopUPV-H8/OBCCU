@@ -49,9 +49,20 @@ namespace OBCCU {
         battery_data batteries_data[10];
     }
 
+    namespace Leds {
+        DigitalOutput low_charge;
+        DigitalOutput full_charge;
+        DigitalOutput sleep;
+        DigitalOutput flash;
+        DigitalOutput can;
+        DigitalOutput fault;
+        DigitalOutput operational;
+    };
+
     namespace Contactors {
         DigitalOutput high;
         DigitalOutput low;
+        DigitalOutput mid;
     }
 
     namespace Orders {
@@ -67,37 +78,37 @@ namespace OBCCU {
             Contactors::high.turn_off();
             Contactors::low.turn_off();
             Conditions::contactors_closed = false;
+
+            Leds::can.turn_off();
         };
 
         void close_contactors() {
             Contactors::low.turn_on();
             Contactors::high.turn_on();
             Conditions::contactors_closed = true;
+
+            Leds::can.turn_on();
         };
     };
 
     namespace Sensors {
         LinearSensor charging_current;
-        uint8_t inverter_temperature;
-        uint8_t capacitor_temperature;
-        uint8_t transformer_temperature;
-        uint8_t rectifier_temperature;
+        LinearSensor inverter_temperature;
+        LinearSensor capacitor_temperature;
+        LinearSensor transformer_temperature;
+        LinearSensor rectifier_temperature;
     };
-    namespace Leds {
-        DigitalOutput low_charge;
-        DigitalOutput full_charge;
-        DigitalOutput sleep;
-        DigitalOutput flash;
-        DigitalOutput can;
-        DigitalOutput fault;
-        DigitalOutput operational;
-    };
+
     namespace Communications {
         DatagramSocket udp_socket;
         uint8_t i2c;
     };
     namespace Measurements {
         double charging_current;
+        double inverter_temperature;
+        double capacitor_temperature;
+        double transformer_temperature;
+        double rectifier_temperature;
     };
 
     BMSH bms;
@@ -238,6 +249,10 @@ namespace OBCCU {
                 }
             }, ms(1000), Op::IDLE);
 
+            op_sm.add_mid_precision_cyclic_action([&]() {
+                Sensors::charging_current.read();
+            }, us(3000), Op::IDLE);
+
             op_sm.add_state_machine(ch_sm, Op::CHARGING);
 
             ch_sm.add_state(Ch::CONSTANT_CURRENT);
@@ -312,11 +327,11 @@ namespace OBCCU {
         StateMachines::operational = StateMachine(States::Operational::IDLE);
         StateMachines::charging = StateMachine(States::Charging::PRECHARGE);
 
-        Sensors::charging_current = LinearSensor(PA0, 1, 1, Measurements::charging_current);
-        Sensors::inverter_temperature = ADC::inscribe(PA3);
-        Sensors::capacitor_temperature = ADC::inscribe(PA4);
-        Sensors::transformer_temperature = ADC::inscribe(PA5);
-        Sensors::rectifier_temperature = ADC::inscribe(PA6);
+        Sensors::charging_current = LinearSensor(PA0, 1, 0, Measurements::charging_current);
+        Sensors::inverter_temperature = LinearSensor(PA3, 1, 0, Measurements::inverter_temperature);
+        Sensors::capacitor_temperature = LinearSensor(PA4, 1, 0, Measurements::capacitor_temperature);
+        Sensors::transformer_temperature = LinearSensor(PA5, 1, 0, Measurements::transformer_temperature);
+        Sensors::rectifier_temperature = LinearSensor(PA6, 1, 0, Measurements::rectifier_temperature);
 
         Leds::low_charge = DigitalOutput(PG2);
         Leds::full_charge = DigitalOutput(PG3);

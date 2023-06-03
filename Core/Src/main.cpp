@@ -83,6 +83,15 @@ int main(void)
 		&OBCCU::Packets::batteries_data[9].data
 	};
 
+	HeapPacket charging_current_packet = {
+		920,
+		&OBCCU::Measurements::charging_current,
+		&OBCCU::Measurements::capacitor_temperature,
+		&OBCCU::Measurements::inverter_temperature,
+		&OBCCU::Measurements::rectifier_temperature,
+		&OBCCU::Measurements::transformer_temperature
+	};
+
 	array<HeapPacket*, 10> battery_packets = {
 		&battery1_packet,
 		&battery2_packet,
@@ -93,7 +102,7 @@ int main(void)
 		&battery7_packet,
 		&battery8_packet,
 		&battery9_packet,
-		&battery10_packet
+		&battery10_packet,
 	};
 
 	DatagramSocket test_socket(IPV4("192.168.1.9"), 50400, IPV4("192.168.0.9"), 50400);
@@ -102,10 +111,9 @@ int main(void)
 		// 	test_socket.send(*packet);
 		// }
 
-		test_socket.send(battery1_packet);
-		test_socket.send(battery2_packet);
+		test_socket.send(charging_current_packet);
 
-		OBCCU::update();
+  		OBCCU::update();
 	}
 }
 
