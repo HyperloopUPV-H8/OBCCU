@@ -92,11 +92,11 @@ namespace OBCCU {
     };
 
     namespace Sensors {
-        LinearSensor charging_current;
-        LinearSensor inverter_temperature;
-        LinearSensor capacitor_temperature;
-        LinearSensor transformer_temperature;
-        LinearSensor rectifier_temperature;
+        LinearSensor<double> charging_current;
+        LinearSensor<double> inverter_temperature;
+        LinearSensor<double> capacitor_temperature;
+        LinearSensor<double> transformer_temperature;
+        LinearSensor<double> rectifier_temperature;
     };
 
     namespace Communications {
@@ -327,11 +327,11 @@ namespace OBCCU {
         StateMachines::operational = StateMachine(States::Operational::IDLE);
         StateMachines::charging = StateMachine(States::Charging::PRECHARGE);
 
-        Sensors::charging_current = LinearSensor(PA0, 1, 0, Measurements::charging_current);
-        Sensors::inverter_temperature = LinearSensor(PA3, 1, 0, Measurements::inverter_temperature);
-        Sensors::capacitor_temperature = LinearSensor(PA4, 1, 0, Measurements::capacitor_temperature);
-        Sensors::transformer_temperature = LinearSensor(PA5, 1, 0, Measurements::transformer_temperature);
-        Sensors::rectifier_temperature = LinearSensor(PA6, 1, 0, Measurements::rectifier_temperature);
+        Sensors::charging_current = LinearSensor<double>(PA0, 1, 0, Measurements::charging_current);
+        Sensors::inverter_temperature = LinearSensor<double>(PA3, 1, 0, Measurements::inverter_temperature);
+        Sensors::capacitor_temperature = LinearSensor<double>(PA4, 1, 0, Measurements::capacitor_temperature);
+        Sensors::transformer_temperature = LinearSensor<double>(PA5, 1, 0, Measurements::transformer_temperature);
+        Sensors::rectifier_temperature = LinearSensor<double>(PA6, 1, 0, Measurements::rectifier_temperature);
 
         Leds::low_charge = DigitalOutput(PG2);
         Leds::full_charge = DigitalOutput(PG3);
