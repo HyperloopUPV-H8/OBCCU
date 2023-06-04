@@ -8,6 +8,10 @@
 
 int main(void)
 {
+	if (BMS::EXTERNAL_ADCS != 5) {
+		ErrorHandler("BMS::EXTERNAL_ADCS must be 5");
+	}
+	
 	OBCCU::inscribe();
 	OBCCU::start();
 
