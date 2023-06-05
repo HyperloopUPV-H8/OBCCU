@@ -152,18 +152,6 @@ namespace OBCCU {
                 Leds::operational.turn_on();
             }, Gen::OPERATIONAL);
 
-            // sm.add_low_precision_cyclic_action([&]() {
-            //     bms.wake_up();
-            //     bms.start_adc_conversion_temperatures();
-            // }, ms(200), Gen::OPERATIONAL);
-
-            // HAL_Delay(10);
-
-            // sm.add_low_precision_cyclic_action([&]() {
-            //     bms.wake_up();
-            //     bms.read_temperatures();
-            // }, ms(200), Gen::OPERATIONAL);
-
             sm.add_enter_action([&]() {
                 Leds::fault.turn_on();
             }, Gen::FAULT);
@@ -232,14 +220,26 @@ namespace OBCCU {
             op_sm.add_low_precision_cyclic_action([&]() {
                 bms.wake_up();
                 bms.measure_internal_device_parameters();
-            }, ms(1000), Op::IDLE);
+            }, ms(10), Op::IDLE);
 
-            HAL_Delay(10);
+            HAL_Delay(3);
 
             op_sm.add_low_precision_cyclic_action([&]() {
                 bms.wake_up();
                 bms.read_internal_temperature();
-            }, ms(1000), Op::IDLE);
+            }, ms(10), Op::IDLE);
+
+            op_sm.add_mid_precision_cyclic_action([&]() {
+                bms.wake_up();
+                bms.start_adc_conversion_gpio();
+            }, us(3000), Op::IDLE);
+
+            HAL_Delay(2);
+
+            op_sm.add_mid_precision_cyclic_action([&]() {
+                bms.wake_up();
+                bms.read_temperatures();
+            }, us(3000), Op::IDLE);
 
             op_sm.add_low_precision_cyclic_action([&]() {
                 for (LTC6811& adc: bms.external_adcs) {
