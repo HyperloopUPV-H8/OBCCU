@@ -37,6 +37,16 @@ int main(void)
 		&OBCCU::Orders::close_contactors
 	};
 
+	HeapOrder turn_on_IMD = {
+		904,
+		&OBCCU::Orders::turn_on_IMD
+	};
+
+	HeapOrder turn_off_IMD = {
+		905,
+		&OBCCU::Orders::turn_off_IMD
+	};
+
 	HeapPacket battery1_packet = {
 		910,
 		&OBCCU::Packets::batteries_data[0].data
@@ -89,7 +99,7 @@ int main(void)
 
 	HeapPacket charging_current_packet = {
 		920,
-		&OBCCU::Measurements::charging_current,
+		&OBCCU::Measurements::average_current,
 		&OBCCU::Measurements::capacitor_temperature,
 		&OBCCU::Measurements::inverter_temperature,
 		&OBCCU::Measurements::rectifier_temperature,
@@ -109,6 +119,13 @@ int main(void)
 		&battery10_packet,
 	};
 
+	HeapPacket IMD_packet = {
+		921,
+		&OBCCU::Measurements::IMD_duty_cycle,
+		&OBCCU::Measurements::IMD_frequency,
+		&OBCCU::Measurements::IMD_OK
+	};
+
 	DatagramSocket test_socket(IPV4("192.168.1.9"), 50400, IPV4("192.168.0.9"), 50400);
 	while(1) {
 		for (HeapPacket* packet : battery_packets) {
@@ -116,6 +133,7 @@ int main(void)
 		}
 
 		test_socket.send(charging_current_packet);
+		test_socket.send(IMD_packet);
 
   		OBCCU::update();
 	}

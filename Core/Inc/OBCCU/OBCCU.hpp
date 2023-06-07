@@ -2,6 +2,9 @@
 #include "ST-LIB.hpp"
 
 namespace OBCCU {
+
+    DigitalOutput IMD_Power;
+
     namespace States {
         enum General : uint8_t {
             CONNECTING = 0,
@@ -27,7 +30,7 @@ namespace OBCCU {
     }
     namespace Packets {
         struct battery_data {
-            float* data[11];
+            float* data[12];
         };
         
         battery_data serialize_battery(Battery& battery) {
@@ -42,6 +45,7 @@ namespace OBCCU {
                     &battery.minimum_cell,
                     &battery.maximum_cell,
                     battery.temperature1,
+                    battery.temperature2,
                     (float*)&battery.is_balancing
             };
         }
@@ -89,6 +93,16 @@ namespace OBCCU {
 
             Leds::can.turn_on();
         };
+
+        void turn_on_IMD() {
+            IMD_Power.turn_on();
+            Leds::full_charge.turn_on();
+        };
+
+        void turn_off_IMD() {
+            IMD_Power.turn_off();
+            Leds::full_charge.turn_off();
+        };
     };
 
     namespace Sensors {
@@ -97,6 +111,8 @@ namespace OBCCU {
         LinearSensor<double> capacitor_temperature;
         LinearSensor<double> transformer_temperature;
         LinearSensor<double> rectifier_temperature;
+        uint8_t IMD;
+        uint8_t IMD_OK;
     };
 
     namespace Communications {
@@ -109,6 +125,10 @@ namespace OBCCU {
         double capacitor_temperature;
         double transformer_temperature;
         double rectifier_temperature;
+        double average_current;
+        uint32_t IMD_frequency;
+        uint32_t IMD_duty_cycle;
+        bool IMD_OK;
     };
 
     BMSH bms;
@@ -147,6 +167,12 @@ namespace OBCCU {
             sm.add_low_precision_cyclic_action([&]() {
                 Leds::operational.toggle();
             }, ms(200), Gen::CONNECTING);
+
+            sm.add_low_precision_cyclic_action([&]() {
+                Measurements::IMD_frequency = InputCapture::read_frequency(Sensors::IMD);
+                Measurements::IMD_duty_cycle = InputCapture::read_duty_cycle(Sensors::IMD);
+                Measurements::IMD_OK = DigitalInput::read_pin_state(Sensors::IMD_OK);
+            }, ms(200), Gen::OPERATIONAL);
 
             sm.add_enter_action([&]() {
                 Leds::operational.turn_on();
@@ -251,6 +277,7 @@ namespace OBCCU {
 
             op_sm.add_mid_precision_cyclic_action([&]() {
                 Sensors::charging_current.read();
+                Measurements::average_current += -Measurements::average_current*0.01 + Measurements::charging_current*0.01;
             }, us(3000), Op::IDLE);
 
             op_sm.add_state_machine(ch_sm, Op::CHARGING);
@@ -308,11 +335,6 @@ namespace OBCCU {
         }
     }
 
-
-
-    DigitalOutput IMD_Power;
-
-
     void inscribe();
 	void start();
 	void update();
@@ -327,11 +349,15 @@ namespace OBCCU {
         StateMachines::operational = StateMachine(States::Operational::IDLE);
         StateMachines::charging = StateMachine(States::Charging::PRECHARGE);
 
-        Sensors::charging_current = LinearSensor<double>(PA0, 1, 0, Measurements::charging_current);
+        Sensors::charging_current = LinearSensor<double>(PA0, 366.2, -523, Measurements::charging_current);
         Sensors::inverter_temperature = LinearSensor<double>(PA3, 1, 0, Measurements::inverter_temperature);
         Sensors::capacitor_temperature = LinearSensor<double>(PA4, 1, 0, Measurements::capacitor_temperature);
         Sensors::transformer_temperature = LinearSensor<double>(PA5, 1, 0, Measurements::transformer_temperature);
         Sensors::rectifier_temperature = LinearSensor<double>(PA6, 1, 0, Measurements::rectifier_temperature);
+        Sensors::IMD = InputCapture::inscribe(PF0);
+        Sensors::IMD_OK = DigitalInput::inscribe(PF4);
+
+        IMD_Power = DigitalOutput(PE2);
 
         Leds::low_charge = DigitalOutput(PG2);
         Leds::full_charge = DigitalOutput(PG3);
