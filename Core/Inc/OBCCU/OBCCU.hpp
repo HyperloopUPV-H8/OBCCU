@@ -379,7 +379,7 @@ namespace OBCCU {
         StateMachines::start();
 
         int i = 0;
-        for (LTC6811& adc: bms.external_adcs) {
+        for (LTC6811& adc : bms.external_adcs) {
             for (Battery& battery: adc.batteries) {
                 Packets::batteries_data[i] = Packets::serialize_battery(battery);
                 i++;
