@@ -357,8 +357,6 @@ namespace OBCCU {
         Sensors::IMD = InputCapture::inscribe(PF0);
         Sensors::IMD_OK = DigitalInput::inscribe(PF4);
 
-        IMD_Power = DigitalOutput(PE2);
-
         Leds::low_charge = DigitalOutput(PG2);
         Leds::full_charge = DigitalOutput(PG3);
         Leds::sleep = DigitalOutput(PG4);
@@ -386,6 +384,7 @@ namespace OBCCU {
             }
         }
 
+        InputCapture::turn_on(Sensors::IMD);
         Conditions::ready = true;
         StateMachines::general.check_transitions();
 	}
