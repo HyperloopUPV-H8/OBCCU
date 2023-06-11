@@ -5,12 +5,15 @@
 #include "Runes/Runes.hpp"
 #include "OBCCU/OBCCU.hpp"
 
-
+bool drift = false;
 int main(void)
 {
 	if (BMS::EXTERNAL_ADCS != 5) {
 		ErrorHandler("BMS::EXTERNAL_ADCS must be 5");
 	}
+
+	add_protection(&BMS::EXTERNAL_ADCS, Boundary<const int, NOT_EQUALS>(5));
+	
 	
 	OBCCU::inscribe();
 	OBCCU::start();
@@ -106,6 +109,11 @@ int main(void)
 		&OBCCU::Measurements::transformer_temperature
 	};
 
+	HeapPacket total_voltage_packet = {
+		922,
+		&OBCCU::total_voltage
+	};
+
 	array<HeapPacket*, 10> battery_packets = {
 		&battery1_packet,
 		&battery2_packet,
@@ -123,15 +131,32 @@ int main(void)
 		921,
 		&OBCCU::Measurements::IMD_duty_cycle,
 		&OBCCU::Measurements::IMD_frequency,
-		&OBCCU::Measurements::IMD_OK
+		&OBCCU::Measurements::IMD_OK,
+		&drift
 	};
 
 	DatagramSocket test_socket(IPV4("192.168.1.9"), 50400, IPV4("192.168.0.9"), 50400);
 	while(1) {
+		OBCCU::total_voltage = 0;
+		for (LTC6811& adc: OBCCU::bms.external_adcs) {
+			for (Battery& battery: adc.batteries) {
+				if (battery.total_voltage < 25) {
+					OBCCU::total_voltage += battery.total_voltage;
+				}
+			}
+		}
+
+		if (OBCCU::Measurements::IMD_duty_cycle > 80) {
+			drift = true;
+		} else {
+			drift = false;
+		}
+
 		for (HeapPacket* packet : battery_packets) {
 			test_socket.send(*packet);
 		}
 
+		test_socket.send(total_voltage_packet);
 		test_socket.send(charging_current_packet);
 		test_socket.send(IMD_packet);
 

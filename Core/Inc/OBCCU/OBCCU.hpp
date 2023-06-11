@@ -4,6 +4,7 @@
 namespace OBCCU {
 
     DigitalOutput IMD_Power;
+    float total_voltage;
 
     namespace States {
         enum General : uint8_t {
@@ -30,7 +31,7 @@ namespace OBCCU {
     }
     namespace Packets {
         struct battery_data {
-            float* data[12];
+            float* data[13];
         };
         
         battery_data serialize_battery(Battery& battery) {
@@ -46,7 +47,8 @@ namespace OBCCU {
                     &battery.maximum_cell,
                     battery.temperature1,
                     battery.temperature2,
-                    (float*)&battery.is_balancing
+                    (float*)&battery.is_balancing,
+                    &battery.total_voltage
             };
         }
 
@@ -119,6 +121,7 @@ namespace OBCCU {
         DatagramSocket udp_socket;
         uint8_t i2c;
     };
+
     namespace Measurements {
         double charging_current;
         double inverter_temperature;
@@ -126,8 +129,8 @@ namespace OBCCU {
         double transformer_temperature;
         double rectifier_temperature;
         double average_current;
-        uint32_t IMD_frequency;
-        uint32_t IMD_duty_cycle;
+        float IMD_frequency;
+        float IMD_duty_cycle;
         bool IMD_OK;
     };
 
@@ -231,14 +234,14 @@ namespace OBCCU {
                 return not Conditions::want_to_charge;
             });
 
-            op_sm.add_mid_precision_cyclic_action([&]() {
+            op_sm.add_low_precision_cyclic_action([&]() {
                 bms.wake_up();
                 bms.start_adc_conversion_all_cells();
             }, us(3000), Op::IDLE);
 
             HAL_Delay(2);
 
-            op_sm.add_mid_precision_cyclic_action([&]() {
+            op_sm.add_low_precision_cyclic_action([&]() {
                 bms.wake_up();
                 bms.read_cell_voltages();
             }, us(3000), Op::IDLE);
@@ -255,14 +258,14 @@ namespace OBCCU {
                 bms.read_internal_temperature();
             }, ms(10), Op::IDLE);
 
-            op_sm.add_mid_precision_cyclic_action([&]() {
+            op_sm.add_low_precision_cyclic_action([&]() {
                 bms.wake_up();
                 bms.start_adc_conversion_gpio();
             }, us(3000), Op::IDLE);
 
             HAL_Delay(2);
 
-            op_sm.add_mid_precision_cyclic_action([&]() {
+            op_sm.add_low_precision_cyclic_action([&]() {
                 bms.wake_up();
                 bms.read_temperatures();
             }, us(3000), Op::IDLE);
@@ -275,7 +278,7 @@ namespace OBCCU {
                 }
             }, ms(1000), Op::IDLE);
 
-            op_sm.add_mid_precision_cyclic_action([&]() {
+            op_sm.add_low_precision_cyclic_action([&]() {
                 Sensors::charging_current.read();
                 Measurements::average_current += -Measurements::average_current*0.01 + Measurements::charging_current*0.01;
             }, us(3000), Op::IDLE);
@@ -297,9 +300,9 @@ namespace OBCCU {
 
 
 
-            ch_sm.add_mid_precision_cyclic_action([&]() {
+            ch_sm.add_low_precision_cyclic_action([&]() {
                 high_voltage_charger.set_phase(high_voltage_charger.get_phase() - 1);
-            }, us(50), Ch::PRECHARGE);
+            }, ms(1), Ch::PRECHARGE);
 
             ch_sm.add_exit_action( [&]() {
                 high_voltage_charger.set_phase(0);
@@ -367,10 +370,12 @@ namespace OBCCU {
 
         Contactors::high = DigitalOutput(PG12);
         Contactors::low = DigitalOutput(PG14);
+
+        
     }
 
     void start() {
-        STLIB::start();
+        STLIB::start("192.168.1.9");
         Communications::udp_socket = DatagramSocket( IPV4("192.168.1.9"), 50400, IPV4("192.168.0.9"), 50400);
 
         bms.initialize();
