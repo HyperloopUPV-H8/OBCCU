@@ -14,7 +14,6 @@ int main(void)
 
 	add_protection(&BMS::EXTERNAL_ADCS, Boundary<const int, NOT_EQUALS>(5));
 	
-	
 	OBCCU::inscribe();
 	OBCCU::start();
 
@@ -22,7 +21,7 @@ int main(void)
 
 	HeapOrder start_charging_order = {
 		900,
-		&OBCCU::Orders::start_charging
+		&OBCCU::Orders::start_charging,
 	};
 
 	HeapOrder stop_charging_order = {

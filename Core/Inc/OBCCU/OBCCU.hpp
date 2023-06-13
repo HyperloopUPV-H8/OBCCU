@@ -88,13 +88,30 @@ namespace OBCCU {
             Leds::can.turn_off();
         };
 
+        // Demonstration
+        // void close_contactors() {
+        //     Contactors::low.turn_on();
+        //     Contactors::high.turn_on();
+        //     Conditions::contactors_closed = true;
+
+        //     Leds::can.turn_on();
+        // };
+
+        //TSD
         void close_contactors() {
             Contactors::low.turn_on();
-            Contactors::high.turn_on();
-            Conditions::contactors_closed = true;
 
-            Leds::can.turn_on();
+            Time::set_timeout(2000, []() {
+                Contactors::high.turn_on();
+                Contactors::low.turn_off();
+                Conditions::contactors_closed = true;
+                Leds::can.turn_on();
+                
+            });
+
+
         };
+
 
         void turn_on_IMD() {
             IMD_Power.turn_on();
