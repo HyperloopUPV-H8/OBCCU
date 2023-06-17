@@ -88,30 +88,27 @@ namespace OBCCU {
             Leds::can.turn_off();
         };
 
-        // Demonstration
-        // void close_contactors() {
-        //     Contactors::low.turn_on();
-        //     Contactors::high.turn_on();
-        //     Conditions::contactors_closed = true;
-
-        //     Leds::can.turn_on();
-        // };
-
-        //TSD
         void close_contactors() {
             Contactors::low.turn_on();
+            Contactors::high.turn_on();
+            Conditions::contactors_closed = true;
 
-            Time::set_timeout(2000, []() {
-                Contactors::high.turn_on();
-                Contactors::low.turn_off();
-                Conditions::contactors_closed = true;
-                Leds::can.turn_on();
-                
-            });
-
-
+            Leds::can.turn_on();
         };
 
+        // TSD
+        // void close_contactors() {
+        //     Contactors::low.turn_on();
+
+        //     Time::set_timeout(2000, []() {
+        //         Contactors::high.turn_on();
+        //         Time::set_timeout(1000, [&]() {
+        //             Contactors::low.turn_off();
+        //             Conditions::contactors_closed = true;
+        //             Leds::can.turn_on();
+        //         });
+        //     });
+        // };
 
         void turn_on_IMD() {
             IMD_Power.turn_on();
@@ -398,6 +395,9 @@ namespace OBCCU {
         bms.initialize();
         StateMachines::start();
 
+        ProtectionManager::set_id(Boards::ID::OBCCU);
+        ProtectionManager::link_state_machine(StateMachines::general, States::General::FAULT);
+
         int i = 0;
         for (LTC6811& adc : bms.external_adcs) {
             for (Battery& battery: adc.batteries) {
@@ -414,5 +414,6 @@ namespace OBCCU {
     void update() {
         STLIB::update();
         StateMachines::general.check_transitions();
+        ProtectionManager::check_protections();
     }
 };

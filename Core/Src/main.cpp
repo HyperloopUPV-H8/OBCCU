@@ -13,6 +13,18 @@ int main(void)
 	}
 
 	add_protection(&BMS::EXTERNAL_ADCS, Boundary<const int, NOT_EQUALS>(5));
+
+	for (LTC6811& adc : OBCCU::bms.external_adcs) {
+		for (Battery& battery : adc.batteries) {
+			add_protection(&battery.disbalance, Boundary<float, ProtectionType::ABOVE>(Battery::MAX_DISBALANCE));
+			add_protection(&battery.total_voltage, Boundary<float, ProtectionType::BELOW>(19.8));
+			for (float* cell: battery.cells) {
+				add_protection(cell, Boundary<float, ProtectionType::BELOW>(3.3));
+			}
+
+			add_protection(battery.temperature1, Boundary<float, ProtectionType::ABOVE>(70));
+			add_protection(battery.temperature2, Boundary<float, ProtectionType::ABOVE>(70));
+		}
 	
 	OBCCU::inscribe();
 	OBCCU::start();
@@ -139,9 +151,7 @@ int main(void)
 		OBCCU::total_voltage = 0;
 		for (LTC6811& adc: OBCCU::bms.external_adcs) {
 			for (Battery& battery: adc.batteries) {
-				if (battery.total_voltage < 25) {
 					OBCCU::total_voltage += battery.total_voltage;
-				}
 			}
 		}
 
