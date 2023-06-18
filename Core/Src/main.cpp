@@ -6,35 +6,53 @@
 #include "OBCCU/OBCCU.hpp"
 
 bool drift = false;
-int main(void)
-{
+int main(void) {
 	if (BMS::EXTERNAL_ADCS != 5) {
 		ErrorHandler("BMS::EXTERNAL_ADCS must be 5");
 	}
 
 	add_protection(&BMS::EXTERNAL_ADCS, Boundary<const int, NOT_EQUALS>(5));
 
+	int i = 0;
 	for (LTC6811& adc : OBCCU::bms.external_adcs) {
-		for (Battery& battery : adc.batteries) {
-			add_protection(&battery.disbalance, Boundary<float, ProtectionType::ABOVE>(Battery::MAX_DISBALANCE));
-			add_protection(&battery.total_voltage, Boundary<float, ProtectionType::BELOW>(19.8));
-			for (float* cell: battery.cells) {
-				add_protection(cell, Boundary<float, ProtectionType::BELOW>(3.3));
-			}
-
-			add_protection(battery.temperature1, Boundary<float, ProtectionType::ABOVE>(70));
-			add_protection(battery.temperature2, Boundary<float, ProtectionType::ABOVE>(70));
+		if (i == 4) {
+			break;
 		}
-	
+		for (Battery& battery : adc.batteries) {
+
+			// add_protection(&battery.disbalance, Boundary<float, ProtectionType::ABOVE>(Battery::MAX_DISBALANCE));
+			add_protection(&battery.total_voltage, Boundary<float, ProtectionType::BELOW>(19.8));
+			add_protection(&battery.total_voltage, Boundary<float, ProtectionType::ABOVE>(26));
+			// for (float* cell: battery.cells) {
+			// 	add_protection(cell, Boundary<float, ProtectionType::BELOW>(3.3));
+			// 	add_protection(cell, Boundary<float, ProtectionType::ABOVE>(4.2));
+			// }
+
+			// add_protection(battery.temperature1, Boundary<float, ProtectionType::ABOVE>(70));
+			// add_protection(battery.temperature2, Boundary<float, ProtectionType::ABOVE>(70));
+		}
+		i++;
+	}
+
+	add_protection(&OBCCU::Measurements::IMD_duty_cycle, Boundary<float, ProtectionType::ABOVE>(50));
+
 	OBCCU::inscribe();
 	OBCCU::start();
 
 	ServerSocket tcp_socket(IPV4("192.168.1.9"), 50500);
+	StateOrder::set_socket(tcp_socket);
 
 	HeapOrder start_charging_order = {
 		900,
 		&OBCCU::Orders::start_charging,
 	};
+
+	// HeapStateOrder start_charging_order = {
+	// 	900,
+	// 	&OBCCU::Orders::start_charging,
+	// 	OBCCU::StateMachines::general,
+	// 	OBCCU::States::OPERATIONAL
+	// };
 
 	HeapOrder stop_charging_order = {
 		901,
@@ -147,6 +165,12 @@ int main(void)
 	};
 
 	DatagramSocket test_socket(IPV4("192.168.1.9"), 50400, IPV4("192.168.0.9"), 50400);
+
+	OBCCU::Orders::turn_on_IMD();
+	Time::set_timeout(5000, [&](){
+		OBCCU::Conditions::first_read = true;
+	});
+
 	while(1) {
 		OBCCU::total_voltage = 0;
 		for (LTC6811& adc: OBCCU::bms.external_adcs) {
@@ -170,6 +194,7 @@ int main(void)
 		test_socket.send(IMD_packet);
 
   		OBCCU::update();
+
 	}
 }
 

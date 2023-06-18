@@ -28,6 +28,7 @@ namespace OBCCU {
         bool want_to_charge = false;
         bool fault = false;
         bool contactors_closed = false;
+        bool first_read = false;
     }
     namespace Packets {
         struct battery_data {
@@ -88,27 +89,27 @@ namespace OBCCU {
             Leds::can.turn_off();
         };
 
-        void close_contactors() {
-            Contactors::low.turn_on();
-            Contactors::high.turn_on();
-            Conditions::contactors_closed = true;
-
-            Leds::can.turn_on();
-        };
-
-        // TSD
         // void close_contactors() {
         //     Contactors::low.turn_on();
+        //     Contactors::high.turn_on();
+        //     Conditions::contactors_closed = true;
 
-        //     Time::set_timeout(2000, []() {
-        //         Contactors::high.turn_on();
-        //         Time::set_timeout(1000, [&]() {
-        //             Contactors::low.turn_off();
-        //             Conditions::contactors_closed = true;
-        //             Leds::can.turn_on();
-        //         });
-        //     });
+        //     Leds::can.turn_on();
         // };
+
+        // TSD
+        void close_contactors() {
+            Contactors::low.turn_on();
+
+            Time::set_timeout(1500, []() {
+                Contactors::high.turn_on();
+                Time::set_timeout(500, [&]() {
+                    Contactors::low.turn_off();
+                    Conditions::contactors_closed = true;
+                    Leds::can.turn_on();
+                });
+            });
+        };
 
         void turn_on_IMD() {
             IMD_Power.turn_on();
@@ -197,6 +198,7 @@ namespace OBCCU {
 
             sm.add_enter_action([&]() {
                 Leds::fault.turn_on();
+                OBCCU::Orders::open_contactors();
             }, Gen::FAULT);
 
             sm.add_exit_action([&]() {
@@ -290,6 +292,7 @@ namespace OBCCU {
                         battery.update_data();
                     }
                 }
+
             }, ms(1000), Op::IDLE);
 
             op_sm.add_low_precision_cyclic_action([&]() {
@@ -392,6 +395,9 @@ namespace OBCCU {
         STLIB::start("192.168.1.9");
         Communications::udp_socket = DatagramSocket( IPV4("192.168.1.9"), 50400, IPV4("192.168.0.9"), 50400);
 
+        IMD_Power.turn_on();
+        Leds::full_charge.turn_on();
+
         bms.initialize();
         StateMachines::start();
 
@@ -414,6 +420,9 @@ namespace OBCCU {
     void update() {
         STLIB::update();
         StateMachines::general.check_transitions();
+
+        if (Conditions::first_read) {
         ProtectionManager::check_protections();
+        }
     }
 };
