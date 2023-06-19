@@ -13,25 +13,25 @@ int main(void) {
 
 	add_protection(&BMS::EXTERNAL_ADCS, Boundary<const int, NOT_EQUALS>(5));
 
-	int i = 0;
+	int nbat = 0;
 	for (LTC6811& adc : OBCCU::bms.external_adcs) {
-		if (i == 4) {
-			break;
-		}
 		for (Battery& battery : adc.batteries) {
+			if (nbat == 3) {
+				break;
+			}
 
-			// add_protection(&battery.disbalance, Boundary<float, ProtectionType::ABOVE>(Battery::MAX_DISBALANCE));
+			add_protection(&battery.disbalance, Boundary<float, ProtectionType::ABOVE>(Battery::MAX_DISBALANCE));
 			add_protection(&battery.total_voltage, Boundary<float, ProtectionType::BELOW>(19.8));
 			add_protection(&battery.total_voltage, Boundary<float, ProtectionType::ABOVE>(26));
-			// for (float* cell: battery.cells) {
-			// 	add_protection(cell, Boundary<float, ProtectionType::BELOW>(3.3));
-			// 	add_protection(cell, Boundary<float, ProtectionType::ABOVE>(4.2));
-			// }
+			for (float* cell: battery.cells) {
+				add_protection(cell, Boundary<float, ProtectionType::BELOW>(3.3));
+				add_protection(cell, Boundary<float, ProtectionType::ABOVE>(4.2));
+			}
 
-			// add_protection(battery.temperature1, Boundary<float, ProtectionType::ABOVE>(70));
-			// add_protection(battery.temperature2, Boundary<float, ProtectionType::ABOVE>(70));
+			add_protection(battery.temperature1, Boundary<float, ProtectionType::ABOVE>(70));
+			add_protection(battery.temperature2, Boundary<float, ProtectionType::ABOVE>(70));
+			nbat++;
 		}
-		i++;
 	}
 
 	add_protection(&OBCCU::Measurements::IMD_duty_cycle, Boundary<float, ProtectionType::ABOVE>(50));

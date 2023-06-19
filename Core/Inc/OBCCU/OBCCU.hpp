@@ -120,6 +120,10 @@ namespace OBCCU {
             IMD_Power.turn_off();
             Leds::full_charge.turn_off();
         };
+
+        void reset() {
+            NVIC_SystemReset();
+        }
     };
 
     namespace Sensors {
