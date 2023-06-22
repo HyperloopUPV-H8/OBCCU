@@ -6,6 +6,7 @@ namespace OBCCU {
     DigitalOutput IMD_Power;
     float total_voltage;
 
+
     namespace States {
         enum General : uint8_t {
             CONNECTING = 0,

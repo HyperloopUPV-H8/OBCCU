@@ -13,26 +13,26 @@ int main(void) {
 
 	add_protection(&BMS::EXTERNAL_ADCS, Boundary<const int, NOT_EQUALS>(5));
 
-	int nbat = 0;
-	for (LTC6811& adc : OBCCU::bms.external_adcs) {
-		for (Battery& battery : adc.batteries) {
-			if (nbat == 3) {
-				break;
-			}
+	// int nbat = 0;
+	// for (LTC6811& adc : OBCCU::bms.external_adcs) {
+	// 	for (Battery& battery : adc.batteries) {
+	// 		if (nbat == 3) {
+	// 			break;
+	// 		}
 
-			add_protection(&battery.disbalance, Boundary<float, ProtectionType::ABOVE>(Battery::MAX_DISBALANCE));
-			add_protection(&battery.total_voltage, Boundary<float, ProtectionType::BELOW>(19.8));
-			add_protection(&battery.total_voltage, Boundary<float, ProtectionType::ABOVE>(26));
-			for (float* cell: battery.cells) {
-				add_protection(cell, Boundary<float, ProtectionType::BELOW>(3.3));
-				add_protection(cell, Boundary<float, ProtectionType::ABOVE>(4.2));
-			}
+	// 		add_protection(&battery.disbalance, Boundary<float, ProtectionType::ABOVE>(Battery::MAX_DISBALANCE));
+	// 		add_protection(&battery.total_voltage, Boundary<float, ProtectionType::BELOW>(19.8));
+	// 		add_protection(&battery.total_voltage, Boundary<float, ProtectionType::ABOVE>(26));
+	// 		for (float* cell: battery.cells) {
+	// 			add_protection(cell, Boundary<float, ProtectionType::BELOW>(3.3));
+	// 			add_protection(cell, Boundary<float, ProtectionType::ABOVE>(4.2));
+	// 		}
 
-			add_protection(battery.temperature1, Boundary<float, ProtectionType::ABOVE>(70));
-			add_protection(battery.temperature2, Boundary<float, ProtectionType::ABOVE>(70));
-			nbat++;
-		}
-	}
+	// 		add_protection(battery.temperature1, Boundary<float, ProtectionType::ABOVE>(70));
+	// 		add_protection(battery.temperature2, Boundary<float, ProtectionType::ABOVE>(70));
+	// 		nbat++;
+	// 	}
+	// }
 
 	add_protection(&OBCCU::Measurements::IMD_duty_cycle, Boundary<float, ProtectionType::ABOVE>(50));
 
@@ -46,13 +46,6 @@ int main(void) {
 		900,
 		&OBCCU::Orders::start_charging,
 	};
-
-	// HeapStateOrder start_charging_order = {
-	// 	900,
-	// 	&OBCCU::Orders::start_charging,
-	// 	OBCCU::StateMachines::general,
-	// 	OBCCU::States::OPERATIONAL
-	// };
 
 	HeapOrder stop_charging_order = {
 		901,
@@ -77,6 +70,11 @@ int main(void) {
 	HeapOrder turn_off_IMD = {
 		905,
 		&OBCCU::Orders::turn_off_IMD
+	};
+
+	HeapOrder reset_board = {
+		906,
+		&OBCCU::Orders::reset
 	};
 
 	HeapPacket battery1_packet = {
@@ -175,7 +173,9 @@ int main(void) {
 		OBCCU::total_voltage = 0;
 		for (LTC6811& adc: OBCCU::bms.external_adcs) {
 			for (Battery& battery: adc.batteries) {
+				if (battery.total_voltage > 19 && battery.total_voltage < 26) {
 					OBCCU::total_voltage += battery.total_voltage;
+				}
 			}
 		}
 
