@@ -9,12 +9,8 @@
 
 namespace OBCCU {
     IncomingOrders incoming_orders;
+    UDP udp;
     Packets packets;
-
-    namespace Communications {
-        DatagramSocket udp_socket;
-        uint8_t i2c;
-    };
 
     void inscribe();
 	void start();
@@ -46,10 +42,7 @@ namespace OBCCU {
 
     void start() {
         STLIB::start("192.168.1.9");
-        Communications::udp_socket = DatagramSocket( IPV4("192.168.1.9"), 50400, IPV4("192.168.0.9"), 50400);
-
-        Leds::full_charge.turn_on();
-
+        udp.init();
         bms.initialize();
         StateMachines::start();
 
@@ -64,7 +57,9 @@ namespace OBCCU {
             }
         }
 
-        Conditions::ready = true;
+        Time::set_timeout(1000, [&](){
+            Conditions::ready = true;
+        });
         StateMachines::general.check_transitions();
 	}
 
@@ -72,8 +67,8 @@ namespace OBCCU {
         STLIB::update();
         StateMachines::general.check_transitions();
 
-        if (Conditions::first_read) {
-        ProtectionManager::check_protections();
+        if (Conditions::ready) {
+            ProtectionManager::check_protections();
         }
     }
 };

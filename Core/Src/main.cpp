@@ -12,12 +12,8 @@ int main(void) {
 	OBCCU::start();
 
 	ServerSocket tcp_socket(IPV4("192.168.1.9"), 50500);
-	DatagramSocket test_socket(IPV4("192.168.1.9"), 50400, IPV4("192.168.0.9"), 50400);
 
 	OBCCU::Orders::turn_on_IMD();
-	Time::set_timeout(5000, [&](){
-		OBCCU::Conditions::first_read = true;
-	});
 
 	Time::register_low_precision_alarm(15, [&](){
 		OBCCU::total_voltage = OBCCU::bms.get_total_voltage();
@@ -29,12 +25,12 @@ int main(void) {
 		}
 
 		for (HeapPacket* packet : OBCCU::packets.battery_packets) {
-			test_socket.send(*packet);
+			OBCCU::udp.send_to_backend(*packet);
 		}
 
-		test_socket.send(OBCCU::packets.total_voltage_packet);
-		test_socket.send(OBCCU::packets.charging_current_packet);
-		test_socket.send(OBCCU::packets.IMD_packet);
+		OBCCU::udp.send_to_backend(OBCCU::packets.total_voltage_packet);
+		OBCCU::udp.send_to_backend(OBCCU::packets.charging_current_packet);
+		OBCCU::udp.send_to_backend(OBCCU::packets.IMD_packet);
 	});
 
 	while(1) {

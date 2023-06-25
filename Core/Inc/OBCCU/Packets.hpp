@@ -66,4 +66,19 @@ namespace OBCCU {
             battery_packets = {&battery1_packet, &battery2_packet, &battery3_packet, &battery4_packet, &battery5_packet, &battery6_packet, &battery7_packet, &battery8_packet, &battery9_packet, &battery10_packet};
         }
     };
+
+    class UDP {
+    public:
+        DatagramSocket backend;
+        UDP() {}
+
+        void init() {
+            backend = DatagramSocket(IPV4("192.168.1.9"), 50400, IPV4("192.168.0.9"), 50400);
+            backend.reconnect();
+        }
+
+        void send_to_backend(Packet& packet) {
+            backend.send(packet);
+        }
+    };
 }
