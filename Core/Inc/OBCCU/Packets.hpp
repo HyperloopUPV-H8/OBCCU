@@ -5,8 +5,6 @@
 
 namespace OBCCU {
     float total_voltage;
-    bool drift = false;
-
 
     struct battery_data {
         float* data[13];
@@ -62,7 +60,8 @@ namespace OBCCU {
         battery10_packet(919, &batteries_data[9].data),
         charging_current_packet(920, &Measurements::charging_current),
         total_voltage_packet(921, &OBCCU::total_voltage),
-        IMD_packet(922, &OBCCU::imd.duty_cycle) {
+        IMD_packet(922, &OBCCU::imd.duty_cycle, &OBCCU::imd.frequency, &OBCCU::imd.drift)
+        {
             battery_packets = {&battery1_packet, &battery2_packet, &battery3_packet, &battery4_packet, &battery5_packet, &battery6_packet, &battery7_packet, &battery8_packet, &battery9_packet, &battery10_packet};
         }
     };

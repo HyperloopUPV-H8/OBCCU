@@ -18,12 +18,6 @@ int main(void) {
 	Time::register_low_precision_alarm(15, [&](){
 		OBCCU::total_voltage = OBCCU::bms.get_total_voltage();
 
-		if (OBCCU::imd.duty_cycle > 80) {
-			OBCCU::drift = true;
-		} else {
-			OBCCU::drift = false;
-		}
-
 		for (HeapPacket* packet : OBCCU::packets.battery_packets) {
 			OBCCU::udp.send_to_backend(*packet);
 		}

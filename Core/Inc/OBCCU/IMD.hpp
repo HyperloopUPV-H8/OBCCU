@@ -13,6 +13,7 @@ namespace OBCCU {
         double frequency;
         double duty_cycle;
         PinState OK;
+        bool drift;
 
 
         IMD() = default;
@@ -27,6 +28,12 @@ namespace OBCCU {
 
         void read() {
             pwm_sensor.read();
+            if(duty_cycle > 80) {
+                drift = true;
+            } else {
+                drift = false;
+            }
+            
             ok_sensor.read();
         }
     };
