@@ -6,11 +6,7 @@
 #include "OBCCU/OBCCU.hpp"
 
 int main(void) {
-	if (BMS::EXTERNAL_ADCS != 5) {
-		ErrorHandler("BMS::EXTERNAL_ADCS must be 5");
-	}
-
-	add_protection(&BMS::EXTERNAL_ADCS, Boundary<const int, NOT_EQUALS>(5));
+	static_assert(BMS::EXTERNAL_ADCS == 5, "BMS::EXTERNAL_ADCS must be 5");
 
 	OBCCU::inscribe();
 	OBCCU::start();
@@ -42,8 +38,6 @@ int main(void) {
 	});
 
 	while(1) {
-
-
   		OBCCU::update();
 	}
 }
