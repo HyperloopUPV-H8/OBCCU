@@ -1,3 +1,4 @@
+#pragma once
 
 Pin PE2(PORT_E, PIN_2);
 Pin PE3(PORT_E, PIN_3);

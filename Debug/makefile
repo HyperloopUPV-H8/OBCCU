@@ -86,8 +86,8 @@ all: main-build
 main-build: OBCCU.elf secondary-outputs
 
 dependents:
-	-cd /opt/malva/ST-LIB/Debug && $(MAKE) all
-	-cd /opt/BMS-LIB/BMS-LIB/Debug && $(MAKE) all
+	-cd /opt/malva/ST-LIB/Debug && $(MAKE) clean all
+	-cd /opt/BMS-LIB/BMS-LIB/Debug && $(MAKE) clean all
 
 # Tool invocations
 OBCCU.elf OBCCU.map: $(OBJS) $(USER_OBJS) /opt/malva/ST-LIB/Debug/libST-LIB.a /opt/BMS-LIB/BMS-LIB/Debug/libBMS-LIB.a /home/alejandro/projects/H8/OBCCU/OBCCU/STM32H723ZGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)

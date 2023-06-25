@@ -117,6 +117,7 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
  ../Middlewares/Third_Party/LwIP/src/include/lwip/init.h \
  ../Middlewares/Third_Party/LwIP/src/include/lwip/netif.h \
  ../Middlewares/Third_Party/LwIP/src/include/lwip/timeouts.h \
+ /opt/malva/ST-LIB/Inc/HALAL/Services/Communication/Ethernet/Ethernet.hpp \
  /opt/malva/ST-LIB/Inc/HALAL/Models/Packets/Packet.hpp \
  /opt/malva/ST-LIB/Inc/HALAL/Models/Packets/PacketValue.hpp \
  /opt/malva/ST-LIB/Inc/HALAL/Models/Concepts/Concepts.hpp \
@@ -125,7 +126,6 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
  /opt/malva/ST-LIB/Inc/HALAL/Models/Packets/Order.hpp \
  /opt/malva/ST-LIB/Inc/HALAL/Models/Packets/OrderProtocol.hpp \
  /opt/malva/ST-LIB/Inc/HALAL/Services/Communication/Ethernet/TCP/Socket.hpp \
- /opt/malva/ST-LIB/Inc/HALAL/Services/Communication/Ethernet/Ethernet.hpp \
  /opt/malva/ST-LIB/Inc/HALAL/Services/Communication/FDCAN/FDCAN.hpp \
  /opt/malva/ST-LIB/Inc/HALAL/Services/Communication/SNTP/SNTP.hpp \
  ../Middlewares/Third_Party/LwIP/src/include/lwip/apps/sntp.h \
@@ -136,20 +136,24 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
  /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Clocks/Counter.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Clocks/Stopwatch.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/LinearSensor/LinearSensor.hpp \
+ /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/Sensor/Sensor.hpp \
+ /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/LinearSensor/FilteredLinearSensor.hpp \
+ /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/MovingAverage.hpp \
+ /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/../ControlSystem.hpp \
+ /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/../ControlBlock.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_LOW/StateMachine/StateMachine.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_LOW/DigitalOutput/DigitalOutput.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_LOW/HalfBridge/HalfBridge.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Math/Math.hpp \
- /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/Sensor/Sensor.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/DigitalSensor/DigitalSensor.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/SensorInterrupt/SensorInterrupt.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/LookupSensor/LookupSensor.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/EncoderSensor/EncoderSensor.hpp \
+ /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/NTC/NTC.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/ST-LIB_HIGH.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Protections/Protection.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Protections/Boundary.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/MeanCalculator.hpp \
- /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/../ControlBlock.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Protections/ProtectionManager.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Protections/Notification.hpp \
  /opt/malva/ST-LIB/Inc/HALAL/Models/BoardID/BoardID.hpp \
@@ -158,11 +162,10 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
  /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/Adder.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/Derivator.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/Integrator.hpp \
- /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/MovingAverage.hpp \
- /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/../ControlSystem.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/PI.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/PID.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/Saturator.hpp \
+ /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/MatrixMultiplier.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/FlashStorer/FlashStorer.hpp \
  /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/FlashStorer/FlashVariable.hpp \
  ../Core/Src/Runes/Runes.hpp ../Core/Src/Runes/Pins.hpp \
@@ -176,7 +179,8 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
  /opt/BMS-LIB/BMS-LIB/Inc/Models/Cell/Cell.hpp \
  /opt/BMS-LIB/BMS-LIB/Inc/Models/LTC6810/LTC6810.hpp \
  /opt/BMS-LIB/BMS-LIB/Inc/BMSH/BMSH.hpp \
- /opt/BMS-LIB/BMS-LIB/Inc/Models/LTC6811/LTC6811.hpp
+ /opt/BMS-LIB/BMS-LIB/Inc/Models/LTC6811/LTC6811.hpp \
+ /opt/BMS-LIB/BMS-LIB/Inc/Models/ChargingStateMachine/ChargingStateMachine.hpp
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
@@ -297,6 +301,7 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
 ../Middlewares/Third_Party/LwIP/src/include/lwip/init.h:
 ../Middlewares/Third_Party/LwIP/src/include/lwip/netif.h:
 ../Middlewares/Third_Party/LwIP/src/include/lwip/timeouts.h:
+/opt/malva/ST-LIB/Inc/HALAL/Services/Communication/Ethernet/Ethernet.hpp:
 /opt/malva/ST-LIB/Inc/HALAL/Models/Packets/Packet.hpp:
 /opt/malva/ST-LIB/Inc/HALAL/Models/Packets/PacketValue.hpp:
 /opt/malva/ST-LIB/Inc/HALAL/Models/Concepts/Concepts.hpp:
@@ -305,7 +310,6 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
 /opt/malva/ST-LIB/Inc/HALAL/Models/Packets/Order.hpp:
 /opt/malva/ST-LIB/Inc/HALAL/Models/Packets/OrderProtocol.hpp:
 /opt/malva/ST-LIB/Inc/HALAL/Services/Communication/Ethernet/TCP/Socket.hpp:
-/opt/malva/ST-LIB/Inc/HALAL/Services/Communication/Ethernet/Ethernet.hpp:
 /opt/malva/ST-LIB/Inc/HALAL/Services/Communication/FDCAN/FDCAN.hpp:
 /opt/malva/ST-LIB/Inc/HALAL/Services/Communication/SNTP/SNTP.hpp:
 ../Middlewares/Third_Party/LwIP/src/include/lwip/apps/sntp.h:
@@ -316,20 +320,24 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
 /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Clocks/Counter.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Clocks/Stopwatch.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/LinearSensor/LinearSensor.hpp:
+/opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/Sensor/Sensor.hpp:
+/opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/LinearSensor/FilteredLinearSensor.hpp:
+/opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/MovingAverage.hpp:
+/opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/../ControlSystem.hpp:
+/opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/../ControlBlock.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_LOW/StateMachine/StateMachine.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_LOW/DigitalOutput/DigitalOutput.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_LOW/HalfBridge/HalfBridge.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Math/Math.hpp:
-/opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/Sensor/Sensor.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/DigitalSensor/DigitalSensor.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/SensorInterrupt/SensorInterrupt.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/LookupSensor/LookupSensor.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/EncoderSensor/EncoderSensor.hpp:
+/opt/malva/ST-LIB/Inc/ST-LIB_LOW/Sensors/NTC/NTC.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/ST-LIB_HIGH.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Protections/Protection.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Protections/Boundary.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/MeanCalculator.hpp:
-/opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/../ControlBlock.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Protections/ProtectionManager.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Protections/Notification.hpp:
 /opt/malva/ST-LIB/Inc/HALAL/Models/BoardID/BoardID.hpp:
@@ -338,11 +346,10 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
 /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/Adder.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/Derivator.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/Integrator.hpp:
-/opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/MovingAverage.hpp:
-/opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/../ControlSystem.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/PI.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/PID.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/Saturator.hpp:
+/opt/malva/ST-LIB/Inc/ST-LIB_HIGH/Control/Blocks/MatrixMultiplier.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/FlashStorer/FlashStorer.hpp:
 /opt/malva/ST-LIB/Inc/ST-LIB_HIGH/FlashStorer/FlashVariable.hpp:
 ../Core/Src/Runes/Runes.hpp:
@@ -359,3 +366,4 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
 /opt/BMS-LIB/BMS-LIB/Inc/Models/LTC6810/LTC6810.hpp:
 /opt/BMS-LIB/BMS-LIB/Inc/BMSH/BMSH.hpp:
 /opt/BMS-LIB/BMS-LIB/Inc/Models/LTC6811/LTC6811.hpp:
+/opt/BMS-LIB/BMS-LIB/Inc/Models/ChargingStateMachine/ChargingStateMachine.hpp:
