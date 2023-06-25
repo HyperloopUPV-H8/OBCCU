@@ -79,4 +79,15 @@ namespace OBCCU {
                            turn_off_IMD(905, Orders::turn_off_IMD),
                            reset_board(906, Orders::reset) {}
     };
+
+    class TCP {
+    public:
+        ServerSocket backend;
+
+        TCP() {}
+
+        void init() {
+            backend = ServerSocket(IPV4("192.168.1.9"), 50500);
+        }
+    };
 }

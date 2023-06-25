@@ -10,6 +10,7 @@
 namespace OBCCU {
     IncomingOrders incoming_orders;
     UDP udp;
+    TCP tcp;
     Packets packets;
 
     void inscribe();
@@ -43,6 +44,8 @@ namespace OBCCU {
     void start() {
         STLIB::start("192.168.1.9");
         udp.init();
+        tcp.init();
+        
         bms.initialize();
         StateMachines::start();
 
@@ -62,6 +65,16 @@ namespace OBCCU {
         });
         StateMachines::general.check_transitions();
 	}
+
+    void send_to_backend() {
+        for (HeapPacket* packet : packets.battery_packets) {
+            udp.send_to_backend(*packet);
+        }
+
+        udp.send_to_backend(packets.total_voltage_packet);
+        udp.send_to_backend(packets.charging_current_packet);
+        udp.send_to_backend(packets.IMD_packet);
+    }
 
     void update() {
         STLIB::update();

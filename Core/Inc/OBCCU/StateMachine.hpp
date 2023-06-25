@@ -57,6 +57,7 @@ namespace OBCCU {
 
             sm.add_low_precision_cyclic_action([&]() {
                 imd.read();
+                OBCCU::total_voltage = OBCCU::bms.get_total_voltage();
             }, ms(200), Gen::OPERATIONAL);
 
             sm.add_enter_action([&]() {
