@@ -14,6 +14,7 @@ namespace OBCCU {
         double duty_cycle;
         PinState OK;
         bool drift;
+        bool is_on;
 
 
         IMD() = default;
@@ -35,6 +36,16 @@ namespace OBCCU {
             }
             
             ok_sensor.read();
+        }
+
+        void turn_on() {
+            power.turn_on();
+            is_on = true;
+        }
+
+        void turn_off() {
+            power.turn_off();
+            is_on = false;
         }
     };
 

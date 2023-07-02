@@ -10,5 +10,6 @@ namespace OBCCU {
         double transformer_temperature;
         double rectifier_temperature;
         double average_current;
+        float total_voltage;
     };
 };

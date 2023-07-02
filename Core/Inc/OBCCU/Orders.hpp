@@ -5,79 +5,27 @@
 #include "OBCCU/Leds.hpp"
 #include "OBCCU/Contactors.hpp"
 #include "OBCCU/IMD.hpp"
+#include "OBCCU/Actions.hpp"
+#include "OBCCU/StateMachine.hpp"
 
 namespace OBCCU {
-    namespace Orders {
-        void start_charging() {
-            Conditions::want_to_charge = true;
-        };
-
-        void stop_charging() {
-            Conditions::want_to_charge = false;
-        };
-
-        void open_contactors() {
-            Contactors::high.turn_off();
-            Contactors::low.turn_off();
-            Conditions::contactors_closed = false;
-
-            Leds::can.turn_off();
-        };
-
-        // void close_contactors() {
-        //     Contactors::low.turn_on();
-        //     Contactors::high.turn_on();
-        //     Conditions::contactors_closed = true;
-
-        //     Leds::can.turn_on();
-        // };
-
-        // TSD
-        void close_contactors() {
-            Contactors::low.turn_on();
-
-            Time::set_timeout(1500, []() {
-                Contactors::high.turn_on();
-                Time::set_timeout(500, [&]() {
-                    Contactors::low.turn_off();
-                    Conditions::contactors_closed = true;
-                    Leds::can.turn_on();
-                });
-            });
-        };
-
-        void turn_on_IMD() {
-            imd.power.turn_on();
-            Leds::full_charge.turn_on();
-        };
-
-        void turn_off_IMD() {
-            imd.power.turn_off();
-            Leds::full_charge.turn_off();
-        };
-
-        void reset() {
-            NVIC_SystemReset();
-        }
-    };
-
     class IncomingOrders {
     public:
-        HeapOrder start_charging_order;
-        HeapOrder stop_charging_order;
-        HeapOrder open_contactors_order;
-        HeapOrder close_contactors_order;
-        HeapOrder turn_on_IMD;
-        HeapOrder turn_off_IMD;
+        HeapStateOrder start_charging_order;
+        HeapStateOrder stop_charging_order;
+        HeapStateOrder open_contactors_order;
+        HeapStateOrder close_contactors_order;
+        HeapStateOrder turn_on_IMD;
+        HeapStateOrder turn_off_IMD;
         HeapOrder reset_board;
 
-        IncomingOrders() : start_charging_order(900, Orders::start_charging),
-                           stop_charging_order(901, Orders::stop_charging),
-                           open_contactors_order(902, Orders::open_contactors),
-                           close_contactors_order(903, Orders::close_contactors),
-                           turn_on_IMD(904, Orders::turn_on_IMD),
-                           turn_off_IMD(905, Orders::turn_off_IMD),
-                           reset_board(906, Orders::reset) {}
+        IncomingOrders() : start_charging_order(900, Actions::start_charging, StateMachines::operational, States::Operational::IDLE),
+                           stop_charging_order(901, Actions::stop_charging, StateMachines::operational, States::Operational::CHARGING),
+                           open_contactors_order(902, Actions::open_contactors, StateMachines::contactors_sm, States::Contactors::CLOSED),
+                           close_contactors_order(903, Actions::close_contactors, StateMachines::contactors_sm, States::Contactors::OPEN),
+                           turn_on_IMD(904, Actions::turn_on_IMD, StateMachines::imd_sm, States::IMD::OFF),
+                           turn_off_IMD(905, Actions::turn_off_IMD, StateMachines::imd_sm, States::IMD::ON),
+                           reset_board(906, Actions::reset) {}
     };
 
     class TCP {

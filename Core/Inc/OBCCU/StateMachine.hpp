@@ -1,3 +1,11 @@
+#pragma once
+
+#include "OBCCU/IMD.hpp"
+#include "OBCCU/Measurements.hpp"
+#include "OBCCU/Packets.hpp"
+#include "OBCCU/Actions.hpp"
+#include "OBCCU/Sensors.hpp"
+
 namespace OBCCU {
     
     BMSH bms;
@@ -20,12 +28,26 @@ namespace OBCCU {
             CONSTANT_CURRENT = 101,
             CONSTANT_VOLTAGE = 102
         };
+
+        enum Contactors : uint8_t {
+            OPEN = 0,
+            CLOSED = 1
+        };
+
+        enum IMD : uint8_t {
+            OFF = 0,
+            ON = 1
+        };
     }
 
     namespace StateMachines {
         StateMachine general;
         StateMachine operational;
         StateMachine charging;
+
+        // Auxiliar State Machines
+        StateMachine contactors_sm;
+        StateMachine imd_sm;
 
         void start() {
             StateMachine& sm = general;
@@ -55,18 +77,14 @@ namespace OBCCU {
                 Leds::operational.toggle();
             }, ms(200), Gen::CONNECTING);
 
-            sm.add_low_precision_cyclic_action([&]() {
-                imd.read();
-                OBCCU::total_voltage = OBCCU::bms.get_total_voltage();
-            }, ms(200), Gen::OPERATIONAL);
-
             sm.add_enter_action([&]() {
                 Leds::operational.turn_on();
             }, Gen::OPERATIONAL);
 
             sm.add_enter_action([&]() {
                 Leds::fault.turn_on();
-                OBCCU::Orders::open_contactors();
+                Conditions::fault = true;
+                OBCCU::Actions::open_contactors();
             }, Gen::FAULT);
 
             sm.add_exit_action([&]() {
@@ -118,55 +136,60 @@ namespace OBCCU {
                 return not Conditions::want_to_charge;
             });
 
-            op_sm.add_low_precision_cyclic_action([&]() {
+            sm.add_low_precision_cyclic_action([&]() {
                 bms.wake_up();
                 bms.start_adc_conversion_all_cells();
-            }, us(3000), Op::IDLE);
+            }, us(3000), {Gen::OPERATIONAL, Gen::FAULT});
 
             HAL_Delay(2);
 
-            op_sm.add_low_precision_cyclic_action([&]() {
+            sm.add_low_precision_cyclic_action([&]() {
                 bms.wake_up();
                 bms.read_cell_voltages();
-            }, us(3000), Op::IDLE);
+            }, us(3000), {Gen::OPERATIONAL, Gen::FAULT});
 
-            op_sm.add_low_precision_cyclic_action([&]() {
+            sm.add_low_precision_cyclic_action([&]() {
+                imd.read();
+                Measurements::total_voltage = OBCCU::bms.get_total_voltage();
+            }, ms(10), {Gen::OPERATIONAL, Gen::FAULT});
+
+            sm.add_low_precision_cyclic_action([&]() {
                 bms.wake_up();
                 bms.measure_internal_device_parameters();
-            }, ms(10), Op::IDLE);
+            }, ms(10), {Gen::OPERATIONAL, Gen::FAULT});
 
             HAL_Delay(3);
 
-            op_sm.add_low_precision_cyclic_action([&]() {
+            sm.add_low_precision_cyclic_action([&]() {
                 bms.wake_up();
                 bms.read_internal_temperature();
-            }, ms(10), Op::IDLE);
+            }, ms(10), {Gen::OPERATIONAL, Gen::FAULT});
 
-            op_sm.add_low_precision_cyclic_action([&]() {
+            sm.add_low_precision_cyclic_action([&]() {
                 bms.wake_up();
-                bms.start_adc_conversion_gpio();
-            }, us(3000), Op::IDLE);
+                bms.start_adc_conversion_all_cells();
+            }, us(3000), {Gen::OPERATIONAL, Gen::FAULT});
 
             HAL_Delay(2);
 
-            op_sm.add_low_precision_cyclic_action([&]() {
+            sm.add_low_precision_cyclic_action([&]() {
                 bms.wake_up();
                 bms.read_temperatures();
-            }, us(3000), Op::IDLE);
+            }, us(3000), {Gen::OPERATIONAL, Gen::FAULT});
 
-            op_sm.add_low_precision_cyclic_action([&]() {
+            sm.add_low_precision_cyclic_action([&]() {
                 for (LTC6811& adc: bms.external_adcs) {
                     for (Battery& battery: adc.batteries) {
                         battery.update_data();
                     }
                 }
 
-            }, ms(1000), Op::IDLE);
+            }, ms(1000), {Gen::OPERATIONAL, Gen::FAULT});
 
-            op_sm.add_low_precision_cyclic_action([&]() {
+            sm.add_low_precision_cyclic_action([&]() {
                 Sensors::charging_current.read();
                 Measurements::average_current += -Measurements::average_current*0.01 + Measurements::charging_current*0.01;
-            }, us(3000), Op::IDLE);
+            }, us(3000), {Gen::OPERATIONAL, Gen::FAULT});
 
             op_sm.add_state_machine(ch_sm, Op::CHARGING);
 
@@ -219,6 +242,25 @@ namespace OBCCU {
                 }
 
                 return false;
+            });
+
+            contactors_sm.add_state(States::Contactors::CLOSED);
+            contactors_sm.add_transition(States::Contactors::OPEN, States::Contactors::CLOSED, [&]() {
+                return Conditions::contactors_closed;
+            });
+
+            contactors_sm.add_transition(States::Contactors::CLOSED, States::Contactors::OPEN, [&]() {
+                return not Conditions::contactors_closed;
+            });
+
+            imd_sm.add_state(States::IMD::ON);
+
+            imd_sm.add_transition(States::IMD::OFF, States::IMD::ON, [&]() {
+                return imd.is_on;
+            });
+
+            imd_sm.add_transition(States::IMD::ON, States::IMD::OFF, [&]() {
+                return not imd.is_on;
             });
         }
     }

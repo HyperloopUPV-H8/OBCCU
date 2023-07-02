@@ -1,3 +1,5 @@
+#pragma once
+
 #include "BMS-LIB.hpp"
 #include "OBCCU/Measurements.hpp"
 

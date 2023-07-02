@@ -2,9 +2,9 @@
 
 #include "BMS-LIB.hpp"
 #include "OBCCU/Measurements.hpp"
+#include "OBCCU/IMD.hpp"
 
 namespace OBCCU {
-    float total_voltage;
 
     struct battery_data {
         float* data[13];
@@ -46,6 +46,7 @@ namespace OBCCU {
         HeapPacket total_voltage_packet;
         array<HeapPacket*, 10> battery_packets;
         HeapPacket IMD_packet;
+        HeapPacket conditions_packet;
 
         Packets() :
         battery1_packet(910, &batteries_data[0].data),
@@ -59,8 +60,9 @@ namespace OBCCU {
         battery9_packet(918, &batteries_data[8].data),
         battery10_packet(919, &batteries_data[9].data),
         charging_current_packet(920, &Measurements::charging_current),
-        total_voltage_packet(921, &OBCCU::total_voltage),
-        IMD_packet(922, &OBCCU::imd.duty_cycle, &OBCCU::imd.frequency, &OBCCU::imd.OK, &OBCCU::imd.drift)
+        total_voltage_packet(921, &Measurements::total_voltage),
+        IMD_packet(922, &OBCCU::imd.duty_cycle, &OBCCU::imd.frequency, &OBCCU::imd.OK, &OBCCU::imd.drift),
+        conditions_packet(923, &Conditions::ready, &Conditions::want_to_charge, &Conditions::fault, &Conditions::contactors_closed, &Conditions::first_read)
         {
             battery_packets = {&battery1_packet, &battery2_packet, &battery3_packet, &battery4_packet, &battery5_packet, &battery6_packet, &battery7_packet, &battery8_packet, &battery9_packet, &battery10_packet};
         }
