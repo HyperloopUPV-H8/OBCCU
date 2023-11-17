@@ -54,12 +54,11 @@ namespace OBCCU {
         StateMachines::start();
 
         int i = 0;
-        for (LTC6811& adc : bms.external_adcs) {
-            for (Battery& battery: adc.batteries) {
-                batteries_data[i] = serialize_battery(battery);
-                i++;
-            }
-        }
+        for (LTC6810& adc : bms.external_adcs) {
+                        batteries_data[i] = serialize_battery(adc.battery);
+                        i++;
+                }
+        
 
         Time::set_timeout(5000, [&](){
             Conditions::ready = true;

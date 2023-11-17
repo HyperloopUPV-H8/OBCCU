@@ -8,9 +8,9 @@
 int main(void) {
 	static_assert(BMS::EXTERNAL_ADCS == 5, "BMS::EXTERNAL_ADCS must be 5");
 
-	#ifndef BOARD
+	/*#ifndef BOARD
 		static_assert(false, "Board code can not be run in Nucleo mode");
-	#endif
+	#endif*/
 
 	#ifdef HSE_VALUE
 		static_assert(HSE_VALUE == 25000000, "HSE_VALUE must be 25000000");

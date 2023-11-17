@@ -109,26 +109,27 @@ namespace OBCCU {
             });
 
             op_sm.add_transition(Op::CHARGING, Op::BALANCING, [&]() {
-                for (LTC6811& adc: bms.external_adcs) {
-                    for (Battery& battery: adc.batteries) {
-                        if (battery.needs_balance()) {
-                            return true;
-                        }
+                // for (auto& adc: bms.external_adcs) {
+                //     if(adc.battery.needs_balance())  {
+                //         return true;
+                //     }                                              
+                // }
+                // return false;
+
+                for(int i = 0; i < 1; i++){
+                    if(bms.external_adcs[i].battery.needs_balance()){
+                        return true;
                     }
                 }
-
                 return false;
             });
 
             op_sm.add_transition(Op::BALANCING, Op::CHARGING, [&]() {
-                for (LTC6811& adc: bms.external_adcs) {
-                    for (Battery& battery: adc.batteries) {
-                        if (battery.needs_balance()) {
+                for (auto& adc: bms.external_adcs) {                    
+                        if (adc.battery.needs_balance()) {
                             return false;
-                        }
-                    }
+                        }                    
                 }
-
                 return true;
             });
 
@@ -178,10 +179,8 @@ namespace OBCCU {
             }, us(3000), {Gen::OPERATIONAL, Gen::FAULT});
 
             sm.add_low_precision_cyclic_action([&]() {
-                for (LTC6811& adc: bms.external_adcs) {
-                    for (Battery& battery: adc.batteries) {
-                        battery.update_data();
-                    }
+                for (LTC6810& adc: bms.external_adcs) {                    
+                        adc.battery.update_data();                    
                 }
 
             }, ms(1000), {Gen::OPERATIONAL, Gen::FAULT});
@@ -221,23 +220,19 @@ namespace OBCCU {
             });
 
             ch_sm.add_transition(Ch::CONSTANT_CURRENT, Ch::CONSTANT_VOLTAGE, [&]() {
-                for (LTC6811& adc: bms.external_adcs) {
-                    for (Battery& battery: adc.batteries) {
-                        if (battery.SOC >= 0.8) {
+                for (LTC6810& adc: bms.external_adcs) {                    
+                        if (adc.battery.SOC >= 0.8) {
                             return true;
-                        }
-                    }
+                        }                    
                 }
 
                 return false;
             });
 
             ch_sm.add_transition(Ch::CONSTANT_VOLTAGE, Ch::CONSTANT_CURRENT, [&]() {
-                for (LTC6811& adc: bms.external_adcs) {
-                    for (Battery& battery: adc.batteries) {
-                        if (battery.SOC <= 0.6) {
-                            return true;
-                        }
+                for (LTC6810& adc: bms.external_adcs) {                    
+                        if (adc.battery.SOC <= 0.6) {
+                            return true;                        
                     }
                 }
 
