@@ -1,6 +1,6 @@
 build/
 !build/build.sh
-Debug/*
+Debug/
 
 
 
