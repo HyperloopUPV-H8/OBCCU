@@ -7,10 +7,11 @@
 #include "OBCCU/Packets.hpp"
 #include "OBCCU/StateMachine.hpp"
 #include "OBCCU/Protections.hpp"
+extern OBCCU::TCP tcp;
 
 namespace OBCCU {
     UDP udp;
-    TCP tcp;
+
     Packets packets;
 
     void inscribe();

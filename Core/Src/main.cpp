@@ -4,13 +4,17 @@
 #include "ST-LIB.hpp"
 #include "Runes/Runes.hpp"
 #include "OBCCU/OBCCU.hpp"
+#include "OBCCU/Orders.hpp"
+
+OBCCU::TCP tcp;
+
 
 int main(void) {
 	static_assert(BMS::EXTERNAL_ADCS == 5, "BMS::EXTERNAL_ADCS must be 5");
 
-	#ifndef BOARD
+	/*#ifndef BOARD
 		static_assert(false, "Board code can not be run in Nucleo mode");
-	#endif
+	#endif*/
 
 	#ifdef HSE_VALUE
 		static_assert(HSE_VALUE == 8000000, "HSE_VALUE must be 8000000");
@@ -19,7 +23,7 @@ int main(void) {
 	OBCCU::inscribe();
 	OBCCU::start();
 
-	StateOrder::set_socket(OBCCU::tcp.backend);
+	StateOrder::set_socket(tcp.backend);
 	OBCCU::IncomingOrders incoming_orders;
 
 	OBCCU::Actions::turn_on_IMD();
